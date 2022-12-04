@@ -4,11 +4,7 @@ import android.view.View
 import com.xwray.groupie.viewbinding.BindableItem
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.Movie
-import ru.androidschool.intensiv.databinding.FeedFragmentBinding
-import ru.androidschool.intensiv.databinding.FeedHeaderBinding
-import ru.androidschool.intensiv.databinding.ItemWithTextBinding
 import ru.androidschool.intensiv.databinding.SeriesWithTextBinding
-import ru.androidschool.intensiv.databinding.TvShowsFragmentBinding
 
 class SeriesItem(
     private val content: Movie,
@@ -16,9 +12,7 @@ class SeriesItem(
 ) : BindableItem<SeriesWithTextBinding>() {
 
 
-
     override fun getLayout(): Int = R.layout.series_with_text
-
 
     override fun bind(viewBinding: SeriesWithTextBinding, position: Int) {
          viewBinding.seriesName.text = content.title
