@@ -30,4 +30,9 @@ class MainActivity : AppCompatActivity() {
     private fun setupBottomNavMenu(navController: NavController) {
         binding.bottomNavView.setupWithNavController(navController)
     }
+
+    companion object {
+        private val TAG = MainActivity::class.java.simpleName
+        private val API_KEY = BuildConfig.THE_MOVIE_DATABASE_API
+    }
 }
