@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:id="@+id/series_content"
     xmlns:tools="http://schemas.android.com/tools"
-    android:maxHeight="280dp"
+    android:maxHeight="250dp"
     android:background="@color/mainFeedBackground"
     android:orientation="horizontal">
 
@@ -13,7 +13,6 @@
         android:id="@+id/guideline_end"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="1dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@+id/guideline_start"
         app:layout_constraintGuide_end="6dp"
@@ -48,6 +47,7 @@
         android:id="@+id/series_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="23dp"
         android:text="fdgdgdffgd"
         android:textStyle="bold"
         android:textColor="@color/textColorLight"
