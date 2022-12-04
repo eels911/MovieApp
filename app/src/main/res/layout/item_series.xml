@@ -7,6 +7,7 @@
     android:orientation="vertical"
     android:background="@color/colorPrimary">
 <androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/series_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"

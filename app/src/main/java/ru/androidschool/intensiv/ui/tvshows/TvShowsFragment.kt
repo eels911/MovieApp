@@ -5,13 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MockRepository
+import ru.androidschool.intensiv.data.Movie
 import ru.androidschool.intensiv.databinding.FeedFragmentBinding
 import ru.androidschool.intensiv.databinding.FeedHeaderBinding
 import ru.androidschool.intensiv.databinding.TvShowsFragmentBinding
+import ru.androidschool.intensiv.ui.feed.FeedFragment
 import ru.androidschool.intensiv.ui.feed.MainCardContainer
 import ru.androidschool.intensiv.ui.feed.MovieItem
 
@@ -40,14 +43,18 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment){
         // Используя Мок-репозиторий получаем фэйковый список фильмов
         val moviesList = listOf(
             SerialsCardContainer(
-                R.string.recommended,
                 MockRepository.getMovies().map {
-                    MovieItem(it) { movie ->
-
+                    SeriesItem(it) { movie ->
+                    openMovieDetails(movie)
                     }
                 }.toList()
             )
         )
         binding.seriesRecyclerView.adapter = adapter.apply { addAll(moviesList) }
+    }
+    private fun openMovieDetails(movie: Movie) {
+        val bundle = Bundle()
+        bundle.putString(FeedFragment.KEY_TITLE, movie.title)
+        findNavController().navigate(R.id.movie_details_fragment, bundle)
     }
 }

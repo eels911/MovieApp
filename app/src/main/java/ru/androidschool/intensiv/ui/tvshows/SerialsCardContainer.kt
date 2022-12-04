@@ -10,8 +10,6 @@ import ru.androidschool.intensiv.databinding.ItemCardBinding
 import ru.androidschool.intensiv.databinding.ItemSeriesBinding
 
 class SerialsCardContainer(
-    @StringRes
-    private val title: Int,
     private val items: List<BindableItem<*>>
 ) : BindableItem<ItemSeriesBinding>() {
 
@@ -21,6 +19,6 @@ class SerialsCardContainer(
 
     override fun initializeViewBinding(p0: View): ItemSeriesBinding = ItemSeriesBinding.bind(p0)
     override fun bind(viewBinding: ItemSeriesBinding, position: Int) {
-        TODO("Not yet implemented")
+        viewBinding.seriesContainer.adapter = GroupAdapter<GroupieViewHolder>().apply { addAll(items) }
     }
 }
