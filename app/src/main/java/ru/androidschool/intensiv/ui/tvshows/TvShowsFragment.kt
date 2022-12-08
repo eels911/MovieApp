@@ -14,7 +14,7 @@ import ru.androidschool.intensiv.data.Movie
 import ru.androidschool.intensiv.databinding.TvShowsFragmentBinding
 import ru.androidschool.intensiv.ui.feed.FeedFragment
 
-class TvShowsFragment : Fragment(R.layout.tv_shows_fragment){
+class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
     private var _binding: TvShowsFragmentBinding? = null
     private val binding get() = _binding!!
 
@@ -23,9 +23,7 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment){
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = TvShowsFragmentBinding.inflate(inflater, container, false)
 
@@ -36,17 +34,17 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment){
         super.onViewCreated(view, savedInstanceState)
 
         // Используя Мок-репозиторий получаем фэйковый список фильмов
-        val moviesList = listOf(
-            SerialsCardContainer(
-                MockRepository.getMovies().map {
-                    SeriesItem(it) { movie ->
+        val moviesList =
+            MockRepository.getMovies().map {
+                SeriesItem(it) { movie ->
                     openMovieDetails(movie)
-                    }
-                }.toList()
-            )
-        )
+                }
+            }
+
+
         binding.seriesRecyclerView.adapter = adapter.apply { addAll(moviesList) }
     }
+
     private fun openMovieDetails(movie: Movie) {
         val bundle = Bundle()
         bundle.putString(FeedFragment.KEY_TITLE, movie.title)

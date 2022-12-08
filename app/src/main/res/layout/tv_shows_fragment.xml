@@ -1,25 +1,13 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/series_recycler_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:overScrollMode="never"
-    tools:context="ru.androidschool.intensiv.ui.tvshows.TvShowsFragment">
+    android:orientation="vertical"
+    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="ru.androidschool.intensiv.ui.tvshows.TvShowsFragment"
+    tools:listitem="@layout/series_with_text">
 
-   <LinearLayout
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       android:orientation="horizontal">
-
-       <androidx.recyclerview.widget.RecyclerView
-           android:id="@+id/series_recycler_view"
-           android:layout_width="match_parent"
-           android:layout_height="match_parent"
-           android:overScrollMode="never"
-           app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-           app:layout_behavior="@string/appbar_scrolling_view_behavior"
-           tools:listitem="@layout/item_series" />
-
-   </LinearLayout>
-
-</ScrollView>
+</androidx.recyclerview.widget.RecyclerView>
