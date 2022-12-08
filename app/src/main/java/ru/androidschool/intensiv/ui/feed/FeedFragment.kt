@@ -82,7 +82,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
                 MockRepository.getMovies().map {
                     MovieItem(it) { movie ->
                         openMovieDetails(movie)
-                     }
+                    }
                 }.toList()
             )
         )

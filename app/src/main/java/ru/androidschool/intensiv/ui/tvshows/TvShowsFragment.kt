@@ -23,7 +23,9 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         _binding = TvShowsFragmentBinding.inflate(inflater, container, false)
 
@@ -40,7 +42,6 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
                     openMovieDetails(movie)
                 }
             }
-
 
         binding.seriesRecyclerView.adapter = adapter.apply { addAll(moviesList) }
     }
