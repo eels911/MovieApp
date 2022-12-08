@@ -7,7 +7,8 @@ import ru.androidschool.intensiv.data.Movie
 import ru.androidschool.intensiv.databinding.SeriesWithTextBinding
 
 class SeriesItem(
-    private val content: Movie, private val onClick: (movie: Movie) -> Unit
+    private val content: Movie,
+    private val onClick: (movie: Movie) -> Unit
 ) : BindableItem<SeriesWithTextBinding>() {
 
     override fun getLayout(): Int = R.layout.series_with_text
