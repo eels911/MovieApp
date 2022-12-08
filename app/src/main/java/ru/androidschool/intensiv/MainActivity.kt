@@ -18,8 +18,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val host: NavHostFragment = supportFragmentManager
-            .findFragmentById(R.id.my_nav_host_fragment) as NavHostFragment? ?: return
+        val host: NavHostFragment =
+            supportFragmentManager.findFragmentById(R.id.my_nav_host_fragment) as NavHostFragment?
+                ?: return
 
         // Set up Action Bar
         val navController = host.navController
@@ -29,5 +30,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupBottomNavMenu(navController: NavController) {
         binding.bottomNavView.setupWithNavController(navController)
+    }
+
+    companion object {
+        private val TAG = "MainActivity"
+        private val API_KEY = BuildConfig.THE_MOVIE_DATABASE_API
     }
 }

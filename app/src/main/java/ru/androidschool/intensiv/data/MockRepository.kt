@@ -12,7 +12,6 @@ object MockRepository {
             )
             moviesList.add(movie)
         }
-
         return moviesList
     }
 }
