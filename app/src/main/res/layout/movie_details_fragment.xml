@@ -1,12 +1,135 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ru.androidschool.intensiv.ui.movie_details.MovieDetailsFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/colorPrimary">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_root_left"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="16dp"
+        />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_root_right"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="16dp" />
+
+    <ImageView
+        android:id="@+id/iv_top_background"
+        android:layout_width="match_parent"
+        android:layout_height="298dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/img"
+        app:layout_constraintBottom_toTopOf="@id/view"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="-65dp" />
+
+    <ImageView
+        android:id="@+id/button_arrow_image_back"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/ic_baseline_arrow_back_24"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/guideline_root_left"/>
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="450dp"
+        android:background="@color/blueDark"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideline_root_right"
+        app:layout_constraintStart_toEndOf="@+id/guideline_root_left"
+        app:layout_constraintTop_toBottomOf="@id/iv_top_background" />
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:id="@+id/tv_movie_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="325dp"
+        android:layout_marginStart="10dp"
+        android:text="Aquaman"
+        android:textColor="@color/white"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/guideline_root_left"
+        app:layout_constraintTop_toTopOf="@+id/iv_top_background"
+        app:layout_constraintEnd_toStartOf="@id/iv_favorite"/>
+    <ImageView
+        android:id="@+id/iv_favorite"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginTop="325dp"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        android:background="@drawable/ic_baseline_favorite_24"
+        app:layout_constraintStart_toEndOf="@id/tv_movie_name"
+        app:layout_constraintEnd_toStartOf="@id/guideline_root_right"
+        app:layout_constraintTop_toTopOf="@id/iv_top_background"
+        />
+    <Button
+        android:id="@+id/bt_watch"
+        android:layout_width="0dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="23dp"
+        android:layout_marginStart="23dp"
+        android:paddingStart="23dp"
+        android:paddingEnd="23dp"
+        android:text="Смотреть"
+        app:layout_constraintTop_toBottomOf="@id/tv_movie_name"
+        app:layout_constraintStart_toEndOf="@id/guideline_root_left"
+        android:background="@drawable/rectangle_button"
+        />
 
-</FrameLayout>
+    <androidx.appcompat.widget.AppCompatRatingBar
+        android:id="@+id/movie_rating"
+        style="@style/Base.Widget.AppCompat.RatingBar.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@id/guideline_root_right"
+        app:layout_constraintStart_toEndOf="@id/bt_watch"
+        app:layout_constraintTop_toBottomOf="@id/iv_favorite"
+        android:isIndicator="true"
+        android:layout_marginTop="35dp"
+        android:layout_marginStart="113dp"
+        android:numStars="5"
+        android:progressBackgroundTint="@color/colorControlNormal"
+        android:stepSize="0.5"
+        tools:rating="4" />
+    <TextView
+        android:id="@+id/tv_desc"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="A half-Atlantean, half-human who is reluctant to be king of the undersea nation of Atlantis. He is a member of the Justice League. He possesses superhuman strength, durability, and has the ability to manipulate hydrokinesis, the tides, communicate with sea creatures and swim at supersonic speeds."
+        app:layout_constraintStart_toEndOf="@id/guideline_root_left"
+        app:layout_constraintEnd_toStartOf="@id/guideline_root_right"
+        app:layout_constraintTop_toBottomOf="@id/bt_watch"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list_actor"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toStartOf="@id/guideline_root_right"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@id/guideline_root_left"
+        app:layout_constraintTop_toBottomOf="@id/tv_desc"
+        tools:listitem="@layout/item_actor" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/list_actor"
+        app:layout_constraintStart_toEndOf="@id/guideline_root_left"
+        android:text="Cnelbz"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
