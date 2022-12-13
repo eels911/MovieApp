@@ -75,5 +75,7 @@ dependencies {
 
     implementation "com.jakewharton.timber:timber:$rootProject.timberVersion"
 
-    implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$rootProject.retrofitVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$rootProject.interceptorVersion"
 }
