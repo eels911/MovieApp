@@ -67,7 +67,7 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
                     }.toList()
 
                 binding.seriesRecyclerView.adapter = adapter.apply { addAll(seriesList) }
-                adapter.updateAsync(seriesList)
+
             }
 
             override fun onFailure(call: Call<TvShowsResponse>, error: Throwable) {
@@ -75,6 +75,11 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
             }
 
         })
+    }
+
+    override fun onStop() {
+        super.onStop()
+        adapter.clear()
     }
 
     private fun openMovieDetails(movie: TvShow) {

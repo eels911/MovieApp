@@ -27,7 +27,7 @@ data class Movie2(
     @SerializedName("video")
     val video: Boolean?,
     @SerializedName("vote_average")
-    val voteAverage: Double?
+    val voteAverage: Float
 ) {
     @SerializedName("poster_path")
     var posterPath: String? = null

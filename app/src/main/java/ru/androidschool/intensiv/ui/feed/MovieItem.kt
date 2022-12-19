@@ -19,6 +19,7 @@ class MovieItem(
         view.content.setOnClickListener {
             onClick.invoke(content)
         }
+        view.movieRating.rating = content.voteAverage
 
 
         // TODO Получать из модели

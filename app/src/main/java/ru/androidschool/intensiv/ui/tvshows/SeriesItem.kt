@@ -16,13 +16,13 @@ class SeriesItem(
 
     override fun bind(viewBinding: SeriesWithTextBinding, position: Int) {
         viewBinding.seriesName.text = content.name
-      //  viewBinding.movieRating = content.rating
+        viewBinding.movieRating.rating = content.rating.toFloat()
         viewBinding.seriesContent.setOnClickListener {
             onClick.invoke(content)
         }
         Picasso.get()
             .load(content.banner)
-            .into(viewBinding.img)
+            .into(viewBinding.ivTvposter)
     }
 
 

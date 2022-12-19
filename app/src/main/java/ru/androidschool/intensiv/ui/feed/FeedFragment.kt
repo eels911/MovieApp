@@ -84,7 +84,6 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
 
 
                 binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
-                adapter.updateAsync(movieList)
 
             }
 
@@ -199,6 +198,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
     override fun onStop() {
         super.onStop()
         searchBinding.searchToolbar.clear()
+        adapter.clear()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
