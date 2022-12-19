@@ -21,7 +21,6 @@ class MovieItem(
         }
         view.movieRating.rating = content.voteAverage
 
-
         // TODO Получать из модели
         Picasso.get()
             .load(content.posterPath)

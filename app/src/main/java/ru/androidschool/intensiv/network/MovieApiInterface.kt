@@ -11,29 +11,34 @@ import ru.androidschool.intensiv.data.TvShowsResponse
 
 interface MovieApiInterface {
     @GET("movie/now_playing")
-    fun getNowPlayingMovie(@Query("api_key") apiKey:String, @Query("language") language:String): Call<MoviesResponse>
+    fun getNowPlayingMovie(@Query("api_key") apiKey: String, @Query("language") language: String): Call<MoviesResponse>
 
     @GET("movie/upcoming")
     fun getUpcomingMovies(
-        @Query("api_key") apiKey:String, @Query("language") language:String, @Query("page") page: Int
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String,
+        @Query("page") page: Int
     ): Call<MoviesResponse>
 
     @GET("movie/popular")
     fun getPopularMovies(
-        @Query("api_key") apiKey:String, @Query("language") language:String, @Query("page") page: Int
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String,
+        @Query("page") page: Int
     ): Call<MoviesResponse>
 
     @GET("tv/popular")
     fun getPopularSeries(
-        @Query("api_key") apiKey:String, @Query("language") language:String, @Query("page") page: Int
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String,
+        @Query("page") page: Int
     ): Call<TvShowsResponse>
 
     @GET("movie/{movie_id}")
     fun getMovieDetails(
-        @Path("movie_id") id: Int,
+        @Path("movie_id") id: Int
     ): Call<MovieDetailsResponse>
 
     @GET("genre/movie/list")
     fun getGenres(): Call<GenreResponse>
-
 }

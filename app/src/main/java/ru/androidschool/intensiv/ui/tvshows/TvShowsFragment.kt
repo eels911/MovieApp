@@ -50,8 +50,8 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
 //            }
 //
 //        binding.seriesRecyclerView.adapter = adapter.apply { addAll(moviesList) }
-        val getPopularSeries = MovieApiClient.apiClient.getPopularSeries(API_KEY,"ru",7)
-        getPopularSeries.enqueue(object: Callback<TvShowsResponse> {
+        val getPopularSeries = MovieApiClient.apiClient.getPopularSeries(API_KEY, "ru", 7)
+        getPopularSeries.enqueue(object : Callback<TvShowsResponse> {
             override fun onResponse(
                 call: Call<TvShowsResponse>,
                 response: Response<TvShowsResponse>
@@ -60,20 +60,18 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
 
                 val seriesList =
                     series.map {
-                        SeriesItem(it){
+                        SeriesItem(it) {
                                 series ->
                             openMovieDetails(series)
                         }
                     }.toList()
 
                 binding.seriesRecyclerView.adapter = adapter.apply { addAll(seriesList) }
-
             }
 
             override fun onFailure(call: Call<TvShowsResponse>, error: Throwable) {
                 Timber.tag(FeedFragment.TAG).e(error.toString())
             }
-
         })
     }
 

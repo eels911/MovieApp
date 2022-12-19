@@ -2,7 +2,7 @@ package ru.androidschool.intensiv.data
 
 import com.google.gson.annotations.SerializedName
 
-data class TvShowsResponse (
+data class TvShowsResponse(
     var page: Int,
     var results: List<TvShow>,
     @SerializedName("total_results")
@@ -10,4 +10,3 @@ data class TvShowsResponse (
     @SerializedName("total_pages")
     var totalPages: Int
 )
-

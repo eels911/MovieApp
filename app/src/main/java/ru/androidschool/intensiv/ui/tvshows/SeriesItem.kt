@@ -25,6 +25,5 @@ class SeriesItem(
             .into(viewBinding.ivTvposter)
     }
 
-
     override fun initializeViewBinding(view: View) = SeriesWithTextBinding.bind(view)
 }
