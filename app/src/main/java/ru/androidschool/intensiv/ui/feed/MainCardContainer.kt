@@ -21,5 +21,8 @@ class MainCardContainer(
         view.itemsContainer.adapter = GroupAdapter<GroupieViewHolder>().apply { addAll(items) }
     }
 
+
     override fun initializeViewBinding(p0: View): ItemCardBinding = ItemCardBinding.bind(p0)
+
+
 }
