@@ -12,7 +12,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import ru.androidschool.intensiv.BuildConfig
 import ru.androidschool.intensiv.R
-import ru.androidschool.intensiv.data.Movie2
+import ru.androidschool.intensiv.data.MovieDto
 import ru.androidschool.intensiv.data.MoviesResponse
 import ru.androidschool.intensiv.databinding.FeedFragmentBinding
 import ru.androidschool.intensiv.databinding.FeedHeaderBinding
@@ -172,7 +172,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
 //        adapter.apply { addAll(newMoviesList) }
     }
 
-    private fun openMovieDetails(movie: Movie2) {
+    private fun openMovieDetails(movie: MovieDto) {
         val bundle = Bundle()
         bundle.putString(KEY_TITLE, movie.title)
         findNavController().navigate(R.id.movie_details_fragment, bundle, options)

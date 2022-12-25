@@ -10,8 +10,9 @@ import ru.androidschool.intensiv.data.MoviesResponse
 import ru.androidschool.intensiv.data.TvShowsResponse
 
 interface MovieApiInterface {
+    
     @GET("movie/now_playing")
-    fun getNowPlayingMovie(@Query("api_key") apiKey: String, @Query("language") language: String): Call<MoviesResponse>
+    fun getNowPlayingMovie(@Query("api_key") apiKey: $apiKey, @Query("language") language: String): Call<MoviesResponse>
 
     @GET("movie/upcoming")
     fun getUpcomingMovies(
