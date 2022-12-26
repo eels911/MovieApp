@@ -108,7 +108,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/movie_details_margin_top"
         android:textColor="@color/textColorLight"
-        android:text="A half-Atlantean, half-human who is reluctant to be king of the undersea nation of Atlantis. He is a member of the Justice League. He possesses superhuman strength, durability, and has the ability to manipulate hydrokinesis, the tides, communicate with sea creatures and swim at supersonic speeds."
+        tools:text="A half-Atlantean, half-human who is reluctant to be king of the undersea nation of Atlantis. He is a member of the Justice League. He possesses superhuman strength, durability, and has the ability to manipulate hydrokinesis, the tides, communicate with sea creatures and swim at supersonic speeds."
         app:layout_constraintStart_toEndOf="@id/guideline_root_left"
         app:layout_constraintEnd_toStartOf="@id/guideline_root_right"
         app:layout_constraintTop_toBottomOf="@id/bt_watch"/>

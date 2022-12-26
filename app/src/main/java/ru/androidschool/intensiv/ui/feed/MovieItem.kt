@@ -1,7 +1,7 @@
 package ru.androidschool.intensiv.ui.feed
 
 import android.view.View
-import com.squareup.picasso.Picasso
+import android.widget.ImageView
 import com.xwray.groupie.viewbinding.BindableItem
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MovieDto
@@ -20,12 +20,16 @@ class MovieItem(
             onClick.invoke(content)
         }
         view.movieRating.rating = content.voteAverage
+        view.imagePreview.loadImage(content, view)
 
-        // TODO Получать из модели
-        Picasso.get()
-            .load(content.posterPath)
-            .into(view.imagePreview)
     }
 
     override fun initializeViewBinding(v: View) = ItemWithTextBinding.bind(v)
+}
+
+private fun ImageView.loadImage(content: MovieDto,view:ItemWithTextBinding) {
+    com.squareup.picasso.Picasso.get()
+        .load(content.posterPath)
+        .into(view.imagePreview)
+
 }

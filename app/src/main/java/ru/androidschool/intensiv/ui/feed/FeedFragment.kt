@@ -63,7 +63,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
                 openSearch(it.toString())
             }
         }
-        val getNowPlayingMovie = MovieApiClient.apiClient.getNowPlayingMovie(API_KEY, "ru")
+        val getNowPlayingMovie = MovieApiClient.apiClient.getNowPlayingMovie(API_KEY, LANGUAGE)
 
         getNowPlayingMovie.enqueue(object : Callback<MoviesResponse> {
             override fun onResponse(
@@ -106,7 +106,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
 //            )
 //        )
 
-        val getUpcomingMovie = MovieApiClient.apiClient.getUpcomingMovies(API_KEY, "ru", 3)
+        val getUpcomingMovie = MovieApiClient.apiClient.getUpcomingMovies(API_KEY, LANGUAGE, 3)
         getUpcomingMovie.enqueue(object : Callback<MoviesResponse> {
             override fun onResponse(
                 call: Call<MoviesResponse>,
@@ -131,7 +131,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
             }
         })
 
-        val getPopularMovie = MovieApiClient.apiClient.getPopularMovies(API_KEY, "ru", 7)
+        val getPopularMovie = MovieApiClient.apiClient.getPopularMovies(API_KEY, LANGUAGE, 7)
         getPopularMovie.enqueue(object : Callback<MoviesResponse> {
             override fun onResponse(
                 call: Call<MoviesResponse>,
@@ -207,5 +207,6 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         private val API_KEY = BuildConfig.THE_MOVIE_DATABASE_API
         const val TAG = "FeedFragment"
         const val MOVIE_ID = "movie_id"
+        const val LANGUAGE = "ru"
     }
 }

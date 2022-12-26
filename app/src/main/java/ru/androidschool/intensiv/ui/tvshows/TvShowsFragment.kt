@@ -50,7 +50,7 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
 //            }
 //
 //        binding.seriesRecyclerView.adapter = adapter.apply { addAll(moviesList) }
-        val getPopularSeries = MovieApiClient.apiClient.getPopularSeries(API_KEY, "ru", 7)
+        val getPopularSeries = MovieApiClient.apiClient.getPopularSeries(API_KEY, LANGUAGE, 7)
         getPopularSeries.enqueue(object : Callback<TvShowsResponse> {
             override fun onResponse(
                 call: Call<TvShowsResponse>,
@@ -89,5 +89,6 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
     companion object {
         private const val API_KEY = BuildConfig.THE_MOVIE_DATABASE_API
         const val TAG = "TvShowsFragment"
+        const val LANGUAGE = "ru"
     }
 }
