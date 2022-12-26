@@ -1,5 +1,7 @@
 package ru.androidschool.intensiv.data
 
+
+
 object MockRepository {
 
     fun getMovies(): List<Movie> {
@@ -15,7 +17,7 @@ object MockRepository {
         return moviesList
     }
 
-    fun getActors(): List<Actor>{
+    fun getActors(): List<Actor> {
         val actorList = mutableListOf<Actor>()
         for (x in 0..10) {
             val actor = Actor(

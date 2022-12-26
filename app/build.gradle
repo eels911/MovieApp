@@ -21,8 +21,12 @@ android {
     }
     buildTypes {
         release {
+            buildConfigField "String", "BASE_URL", "https://api.themoviedb.org/3/"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            buildConfigField "String", "BASE_URL", "\"https://api.themoviedb.org/3/\""
         }
     }
 
@@ -75,5 +79,7 @@ dependencies {
 
     implementation "com.jakewharton.timber:timber:$rootProject.timberVersion"
 
-    implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$rootProject.retrofitVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$rootProject.interceptorVersion"
 }

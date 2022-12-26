@@ -8,7 +8,7 @@ import ru.androidschool.intensiv.data.Actor
 import ru.androidschool.intensiv.databinding.ItemActorBinding
 
 class ActorItem(
-    private val content: Actor,
+    private val content: Actor
 ) : BindableItem<ItemActorBinding>() {
 
     override fun getLayout(): Int = R.layout.item_actor
@@ -22,7 +22,6 @@ class ActorItem(
             .load("https://m.media-amazon.com/images/M/MV5BYTk3MDljOWQtNGI2My00OTEzLTlhYjQtOTQ4ODM2MzUwY2IwXkEyXkFqcGdeQXVyNTIzOTk5ODM@._V1_.jpg")
             .into(view.ivActor)
     }
-
 
     override fun initializeViewBinding(v: View) = ItemActorBinding.bind(v)
 }
