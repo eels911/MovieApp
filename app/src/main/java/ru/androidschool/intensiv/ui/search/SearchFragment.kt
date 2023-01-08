@@ -50,7 +50,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             MainCardContainer(
                 R.string.search,
                 myList.map {
-                    MovieItem(it){
+                    MovieItem(it) {
                         films ->
                     openMovieDetails(films)
                 }
@@ -71,6 +71,4 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         bundle.putString("KEY_TITLE", movie.title)
         findNavController().navigate(R.id.movie_details_fragment, bundle)
     }
-
-
 }

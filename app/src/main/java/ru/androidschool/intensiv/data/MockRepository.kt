@@ -1,7 +1,5 @@
 package ru.androidschool.intensiv.data
 
-
-
 object MockRepository {
 
     fun getMovies(): List<Movie> {

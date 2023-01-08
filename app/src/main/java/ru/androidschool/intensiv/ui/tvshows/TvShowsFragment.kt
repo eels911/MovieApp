@@ -40,19 +40,18 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
         super.onViewCreated(view, savedInstanceState)
 
         val getPopularSeries = MovieApiClient.apiClient.getPopularSeries(API_KEY, LANGUAGE, 7)
-       getPopularSeries.observeOn(Schedulers.io())
+        getPopularSeries.observeOn(Schedulers.io())
            .observeOn(AndroidSchedulers.mainThread())
-           .subscribe({it->
+            .subscribe({ it ->
                val tvShow = it.results
                val seriesList =
                    tvShow.map {
-                        SeriesItem(it) {
-                                series ->
-                            openMovieDetails(series)
+                       SeriesItem(it) { series ->
+                           openMovieDetails(series)
                        }
-                    }.toList()
-                binding.seriesRecyclerView.adapter = adapter.apply { addAll(seriesList) }
-           },{ error ->
+                   }.toList()
+               binding.seriesRecyclerView.adapter = adapter.apply { addAll(seriesList) }
+           }, { error ->
                // Логируем ошибку
                Timber.tag(TAG).e(error.toString())
            })

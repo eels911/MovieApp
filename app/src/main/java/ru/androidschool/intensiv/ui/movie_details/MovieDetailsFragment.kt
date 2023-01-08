@@ -43,8 +43,6 @@ override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
     val getMovieDetails = MovieApiClient.apiClient.getMovieDetails(id)
 
-
-
 //            val movieList =  listOf( MainCardContainer(
 //                R.string.recommended,
 //                movies.map {
@@ -54,9 +52,6 @@ override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 //                    }
 //                }.toList())
 //            )
-
-
-
 
     binding.listActor.adapter = adapter.apply { addAll(actorList) }
 }

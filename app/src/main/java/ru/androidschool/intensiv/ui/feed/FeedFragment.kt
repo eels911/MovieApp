@@ -1,7 +1,6 @@
 package ru.androidschool.intensiv.ui.feed
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -11,6 +10,7 @@ import com.xwray.groupie.GroupieViewHolder
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
+import java.util.concurrent.TimeUnit
 import ru.androidschool.intensiv.BuildConfig
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MovieDto
@@ -19,7 +19,6 @@ import ru.androidschool.intensiv.databinding.FeedHeaderBinding
 import ru.androidschool.intensiv.network.MovieApiClient
 import ru.androidschool.intensiv.ui.afterTextChanged
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
 class FeedFragment : Fragment(R.layout.feed_fragment) {
 
@@ -34,7 +33,6 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
     private val adapter by lazy {
         GroupAdapter<GroupieViewHolder>()
     }
-
 
     private val options = navOptions {
         anim {
@@ -66,16 +64,11 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         searchBinding.searchToolbar.onTextChangedObservable
             .map { it.trim() }
             .debounce(500, TimeUnit.MILLISECONDS)
-            .filter {it.toString().length > MIN_LENGTH}
-            .doOnNext { Log.d("THR# 42", Thread.currentThread().name) }
+            .filter { it.toString().length > MIN_LENGTH }
             .observeOn(Schedulers.io())
             .doOnNext { }
             .flatMapSingle {
-                MovieApiClient.apiClient.searchByQuery(
-                   API_KEY,
-                    "ru",
-                    it
-                )
+                MovieApiClient.apiClient.searchByQuery(API_KEY, "ru", it)
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
@@ -90,7 +83,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
 
         getNowPlayingMovie.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe (
+            .subscribe(
                 { it ->
                 val movie = it.results
                 val movieList = listOf(
@@ -113,7 +106,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         val getUpcomingMovie = MovieApiClient.apiClient.getUpcomingMovies(API_KEY, LANGUAGE, 3)
         getUpcomingMovie.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({it ->
+            .subscribe({ it ->
                 val movies = it.results
                 val movieList = listOf(MainCardContainer(
                     R.string.upcoming,
@@ -154,7 +147,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
 
     private fun openSearch(searchText: List<MovieDto>) {
         val bundle = Bundle()
-        bundle.putParcelableArrayList("list",ArrayList(searchText))
+        bundle.putParcelableArrayList("list", ArrayList(searchText))
 
         findNavController().navigate(R.id.search_dest, bundle, options)
     }
@@ -176,13 +169,12 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
     }
 
     private fun onSearchEditText(): Observable<String> {
-        return Observable.create{e ->
+        return Observable.create { e ->
             searchBinding.searchToolbar.binding.searchEditText.afterTextChanged {
-                e.onNext(it.toString().filter { ((!it.isWhitespace()) && (it.toString().length > 3))})
-                e.setCancellable{ searchBinding.searchToolbar.binding.searchEditText.setOnTouchListener(null)
-                    e.onComplete()}
+                e.onNext(it.toString().filter { ((!it.isWhitespace()) && (it.toString().length > 3)) })
+                e.setCancellable { searchBinding.searchToolbar.binding.searchEditText.setOnTouchListener(null)
+                    e.onComplete() }
             }
-
         }
     }
     companion object {
@@ -193,9 +185,9 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         const val TAG = "FeedFragment"
         const val MOVIE_ID = "movie_id"
         const val LANGUAGE = "ru"
-        fun newInstance(myList : ArrayList<MovieDto>): FeedFragment {
+        fun newInstance(myList: ArrayList<MovieDto>): FeedFragment {
             val args = Bundle()
-            args.putParcelableArrayList("list",ArrayList(myList))
+            args.putParcelableArrayList("list", ArrayList(myList))
             val fragment = FeedFragment()
             fragment.arguments = args
             return fragment

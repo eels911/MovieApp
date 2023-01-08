@@ -30,7 +30,7 @@ data class MovieDto(
     val video: Boolean?,
     @SerializedName("vote_average")
     val voteAverage: Float
-):Parcelable {
+) : Parcelable {
     @SerializedName("poster_path")
     var posterPath: String? = null
         get() = "https://image.tmdb.org/t/p/w500$field"
