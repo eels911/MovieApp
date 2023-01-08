@@ -1,24 +1,25 @@
 package ru.androidschool.intensiv.ui.feed
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.schedulers.Schedulers
 import ru.androidschool.intensiv.BuildConfig
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MovieDto
-import ru.androidschool.intensiv.data.MoviesResponse
 import ru.androidschool.intensiv.databinding.FeedFragmentBinding
 import ru.androidschool.intensiv.databinding.FeedHeaderBinding
 import ru.androidschool.intensiv.network.MovieApiClient
 import ru.androidschool.intensiv.ui.afterTextChanged
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 class FeedFragment : Fragment(R.layout.feed_fragment) {
 
@@ -34,6 +35,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         GroupAdapter<GroupieViewHolder>()
     }
 
+
     private val options = navOptions {
         anim {
             enter = R.anim.slide_in_right
@@ -43,6 +45,10 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        onSearchEditText()
+    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -50,70 +56,65 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
     ): View {
         _binding = FeedFragmentBinding.inflate(inflater, container, false)
         _searchBinding = FeedHeaderBinding.bind(binding.root)
-
+        onSearchEditText()
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        searchBinding.searchToolbar.binding.searchEditText.afterTextChanged {
-            Timber.d(it.toString())
-            if (it.toString().length > MIN_LENGTH) {
-                openSearch(it.toString())
+        searchBinding.searchToolbar.onTextChangedObservable
+            .map { it.trim() }
+            .debounce(500, TimeUnit.MILLISECONDS)
+            .filter {it.toString().length > MIN_LENGTH}
+            .doOnNext { Log.d("THR# 42", Thread.currentThread().name) }
+            .observeOn(Schedulers.io())
+            .doOnNext { }
+            .flatMapSingle {
+                MovieApiClient.apiClient.searchByQuery(
+                   API_KEY,
+                    "ru",
+                    it
+                )
             }
-        }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                setMovies(it.results)
+                openSearch(it.results)
+                Timber.tag(TAG).d(it.toString())
+            }, {
+                Timber.tag(TAG).e(it.toString())
+            })
+
         val getNowPlayingMovie = MovieApiClient.apiClient.getNowPlayingMovie(API_KEY, LANGUAGE)
 
-        getNowPlayingMovie.enqueue(object : Callback<MoviesResponse> {
-            override fun onResponse(
-                call: Call<MoviesResponse>,
-                response: Response<MoviesResponse>
-            ) {
-                val movies = response.body()?.results!!
-
-                val movieList = listOf(MainCardContainer(
-                    R.string.recommended,
-                    movies.map {
-                        MovieItem(it) {
-                                movie ->
-                            openMovieDetails(movie)
-                        }
-                    }.toList()))
-
+        getNowPlayingMovie.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe (
+                { it ->
+                val movie = it.results
+                val movieList = listOf(
+                    MainCardContainer(
+                        R.string.recommended,
+                        movie.map {
+                            MovieItem(it) { movie ->
+                                openMovieDetails(movie)
+                            }
+                        }.toList()
+                    )
+                )
                 binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
-            }
-
-            override fun onFailure(call: Call<MoviesResponse>, error: Throwable) {
-                // Логируем ошибку
-                Timber.tag(TAG).e(error.toString())
-            }
-        }
-
-        )
-
-        // Используя Мок-репозиторий получаем фэйковый список фильмов
-//        val moviesList = listOf(
-//            MainCardContainer(
-//                R.string.recommended,
-//                MockRepository.getMovies().map {
-//                    MovieItem(it) { movie ->
-//                        openMovieDetails(
-//                            movie
-//                        )
-//                    }
-//                }.toList()
-//            )
-//        )
+            }, { error ->
+                    // Логируем ошибку
+                    Timber.tag(TAG).e(error.toString())
+                }
+            )
 
         val getUpcomingMovie = MovieApiClient.apiClient.getUpcomingMovies(API_KEY, LANGUAGE, 3)
-        getUpcomingMovie.enqueue(object : Callback<MoviesResponse> {
-            override fun onResponse(
-                call: Call<MoviesResponse>,
-                response: Response<MoviesResponse>
-            ) {
-                val movies = response.body()?.results!!
-
+        getUpcomingMovie.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({it ->
+                val movies = it.results
                 val movieList = listOf(MainCardContainer(
                     R.string.upcoming,
                     movies.map {
@@ -124,52 +125,25 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
                     }.toList()))
 
                 binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
-            }
-
-            override fun onFailure(call: Call<MoviesResponse>, error: Throwable) {
+            }, { error ->
+                // Логируем ошибку
                 Timber.tag(TAG).e(error.toString())
-            }
-        })
+            })
+    }
 
-        val getPopularMovie = MovieApiClient.apiClient.getPopularMovies(API_KEY, LANGUAGE, 7)
-        getPopularMovie.enqueue(object : Callback<MoviesResponse> {
-            override fun onResponse(
-                call: Call<MoviesResponse>,
-                response: Response<MoviesResponse>
-            ) {
-                val movies = response.body()?.results!!
+    private fun setMovies(results: List<MovieDto>) {
 
-                val movieList = listOf(MainCardContainer(
-                    R.string.popular,
-                    movies.map {
-                        MovieItem(it) {
-                                movie ->
-                            openMovieDetails(movie)
-                        }
-                    }.toList()))
-
-                binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
-            }
-
-            override fun onFailure(call: Call<MoviesResponse>, error: Throwable) {
-                Timber.tag(TAG).e(error.toString())
-            }
-        })
-
-        // Используя Мок-репозиторий получаем фэйковый список фильмов
-        // Чтобы отобразить второй ряд фильмов
-//        val newMoviesList = listOf(
-//            MainCardContainer(
-//                R.string.upcoming,
-//                MockRepository.getMovies().map {
-//                    MovieItem(it) { movie ->
-//                        openMovieDetails(movie)
-//                    }
-//                }.toList()
-//            )
-//        )
-//
-//        adapter.apply { addAll(newMoviesList) }
+        val movieList = listOf(
+            MainCardContainer(
+                R.string.recommended,
+                results.map {
+                    MovieItem(it) { movie ->
+                        openMovieDetails(movie)
+                    }
+                }.toList()
+            )
+        )
+        binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
     }
 
     private fun openMovieDetails(movie: MovieDto) {
@@ -178,9 +152,10 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         findNavController().navigate(R.id.movie_details_fragment, bundle, options)
     }
 
-    private fun openSearch(searchText: String) {
+    private fun openSearch(searchText: List<MovieDto>) {
         val bundle = Bundle()
-        bundle.putString(KEY_SEARCH, searchText)
+        bundle.putParcelableArrayList("list",ArrayList(searchText))
+
         findNavController().navigate(R.id.search_dest, bundle, options)
     }
 
@@ -200,6 +175,16 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         _searchBinding = null
     }
 
+    private fun onSearchEditText(): Observable<String> {
+        return Observable.create{e ->
+            searchBinding.searchToolbar.binding.searchEditText.afterTextChanged {
+                e.onNext(it.toString().filter { ((!it.isWhitespace()) && (it.toString().length > 3))})
+                e.setCancellable{ searchBinding.searchToolbar.binding.searchEditText.setOnTouchListener(null)
+                    e.onComplete()}
+            }
+
+        }
+    }
     companion object {
         const val MIN_LENGTH = 3
         const val KEY_TITLE = "title"
@@ -208,5 +193,12 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         const val TAG = "FeedFragment"
         const val MOVIE_ID = "movie_id"
         const val LANGUAGE = "ru"
+        fun newInstance(myList : ArrayList<MovieDto>): FeedFragment {
+            val args = Bundle()
+            args.putParcelableArrayList("list",ArrayList(myList))
+            val fragment = FeedFragment()
+            fragment.arguments = args
+            return fragment
+        }
     }
 }
