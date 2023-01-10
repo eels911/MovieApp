@@ -19,4 +19,9 @@
     <dimen name="search_bar_height">56dp</dimen>
     <dimen name="min_height">100dp</dimen>
 
+    <!-- Movie details -->
+    <dimen name="movie_details_margin_top">15dp</dimen>
+    <dimen name="margin_start_small">10dp</dimen>
+    <dimen name="movie_details_margin_text_info">25dp</dimen>
+
 </resources>

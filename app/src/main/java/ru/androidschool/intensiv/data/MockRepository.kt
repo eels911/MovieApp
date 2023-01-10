@@ -14,4 +14,15 @@ object MockRepository {
         }
         return moviesList
     }
+
+    fun getActors(): List<Actor> {
+        val actorList = mutableListOf<Actor>()
+        for (x in 0..10) {
+            val actor = Actor(
+                title = "Sabina S"
+            )
+            actorList.add(actor)
+        }
+        return actorList
+    }
 }
