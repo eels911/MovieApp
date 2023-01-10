@@ -8,17 +8,15 @@ import androidx.navigation.navOptions
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
-import java.util.concurrent.TimeUnit
 import ru.androidschool.intensiv.BuildConfig
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MovieDto
 import ru.androidschool.intensiv.databinding.FeedFragmentBinding
 import ru.androidschool.intensiv.databinding.FeedHeaderBinding
 import ru.androidschool.intensiv.network.MovieApiClient
-import ru.androidschool.intensiv.ui.afterTextChanged
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 class FeedFragment : Fragment(R.layout.feed_fragment) {
 
@@ -45,7 +43,6 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        onSearchEditText()
     }
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,7 +51,6 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
     ): View {
         _binding = FeedFragmentBinding.inflate(inflater, container, false)
         _searchBinding = FeedHeaderBinding.bind(binding.root)
-        onSearchEditText()
         return binding.root
     }
 
@@ -168,29 +164,12 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         _searchBinding = null
     }
 
-    private fun onSearchEditText(): Observable<String> {
-        return Observable.create { e ->
-            searchBinding.searchToolbar.binding.searchEditText.afterTextChanged {
-                e.onNext(it.toString().filter { ((!it.isWhitespace()) && (it.toString().length > 3)) })
-                e.setCancellable { searchBinding.searchToolbar.binding.searchEditText.setOnTouchListener(null)
-                    e.onComplete() }
-            }
-        }
-    }
     companion object {
         const val MIN_LENGTH = 3
         const val KEY_TITLE = "title"
         const val KEY_SEARCH = "search"
         private val API_KEY = BuildConfig.THE_MOVIE_DATABASE_API
         const val TAG = "FeedFragment"
-        const val MOVIE_ID = "movie_id"
         const val LANGUAGE = "ru"
-        fun newInstance(myList: ArrayList<MovieDto>): FeedFragment {
-            val args = Bundle()
-            args.putParcelableArrayList("list", ArrayList(myList))
-            val fragment = FeedFragment()
-            fragment.arguments = args
-            return fragment
-        }
     }
 }
