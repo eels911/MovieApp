@@ -3,6 +3,7 @@ package ru.androidschool.intensiv.data
 import android.os.Parcel
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import ru.androidschool.intensiv.BuildConfig
 
 data class MovieDto(
     @SerializedName("adult")
@@ -33,7 +34,7 @@ data class MovieDto(
 ) : Parcelable {
     @SerializedName("poster_path")
     var posterPath: String? = null
-        get() = "https://image.tmdb.org/t/p/w500$field"
+        get() = "${BuildConfig.IMG_URL}$field"
 
     constructor(parcel: Parcel) : this(
         parcel.readByte() != 0.toByte(),
@@ -79,5 +80,7 @@ data class MovieDto(
         override fun newArray(size: Int): Array<MovieDto?> {
             return arrayOfNulls(size)
         }
+
     }
+
 }

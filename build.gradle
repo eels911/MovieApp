@@ -50,4 +50,6 @@ ext {
     retrofitVersion = '2.9.0'
     interceptorVersion = '4.7.2'
 
+    rxjavaVersion = '3.0.0'
+
 }

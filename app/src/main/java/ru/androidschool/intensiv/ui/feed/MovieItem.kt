@@ -20,14 +20,14 @@ class MovieItem(
             onClick.invoke(content)
         }
         view.movieRating.rating = content.voteAverage
-        view.imagePreview.loadImage(content, view)
+        view.imagePreview.loadImage(content.posterPath)
     }
 
     override fun initializeViewBinding(v: View) = ItemWithTextBinding.bind(v)
 }
 
-private fun ImageView.loadImage(content: MovieDto, view: ItemWithTextBinding) {
+private fun ImageView.loadImage(imgUrl:String?) {
     com.squareup.picasso.Picasso.get()
-        .load(content.posterPath)
-        .into(view.imagePreview)
+        .load(imgUrl)
+        .into(this)
 }

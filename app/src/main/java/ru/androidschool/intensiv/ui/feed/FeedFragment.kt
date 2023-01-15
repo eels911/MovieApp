@@ -8,6 +8,7 @@ import androidx.navigation.navOptions
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import ru.androidschool.intensiv.BuildConfig
 import ru.androidschool.intensiv.R
@@ -41,9 +42,6 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -62,7 +60,6 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
             .debounce(500, TimeUnit.MILLISECONDS)
             .filter { it.toString().length > MIN_LENGTH }
             .observeOn(Schedulers.io())
-            .doOnNext { }
             .flatMapSingle {
                 MovieApiClient.apiClient.searchByQuery(API_KEY, "ru", it)
             }
@@ -77,8 +74,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
 
         val getNowPlayingMovie = MovieApiClient.apiClient.getNowPlayingMovie(API_KEY, LANGUAGE)
 
-        getNowPlayingMovie.subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+        getNowPlayingMovie.subObserve()
             .subscribe(
                 { it ->
                 val movie = it.results
@@ -100,8 +96,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
             )
 
         val getUpcomingMovie = MovieApiClient.apiClient.getUpcomingMovies(API_KEY, LANGUAGE, 3)
-        getUpcomingMovie.subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+        getUpcomingMovie.subObserve()
             .subscribe({ it ->
                 val movies = it.results
                 val movieList = listOf(MainCardContainer(
@@ -162,6 +157,11 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         super.onDestroyView()
         _binding = null
         _searchBinding = null
+    }
+
+    private fun <T>Single<T>.subObserve():Single<T>{
+      return  this.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
     }
 
     companion object {
