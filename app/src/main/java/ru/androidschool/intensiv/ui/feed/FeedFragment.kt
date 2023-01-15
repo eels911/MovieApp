@@ -10,6 +10,7 @@ import com.xwray.groupie.GroupieViewHolder
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.subjects.PublishSubject
 import ru.androidschool.intensiv.BuildConfig
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MovieDto
@@ -55,7 +56,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        searchBinding.searchToolbar.onTextChangedObservable
+   val sourceSearch = PublishSubject.create<String>()
             .map { it.trim() }
             .debounce(500, TimeUnit.MILLISECONDS)
             .filter { it.toString().length > MIN_LENGTH }
@@ -63,7 +64,6 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
             .flatMapSingle {
                 MovieApiClient.apiClient.searchByQuery(API_KEY, "ru", it)
             }
-            .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 setMovies(it.results)
                 openSearch(it.results)
@@ -74,7 +74,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
 
         val getNowPlayingMovie = MovieApiClient.apiClient.getNowPlayingMovie(API_KEY, LANGUAGE)
 
-        getNowPlayingMovie.subObserve()
+        val sourcePlayingMovie = getNowPlayingMovie.subObserve()
             .subscribe(
                 { it ->
                 val movie = it.results
@@ -96,8 +96,10 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
             )
 
         val getUpcomingMovie = MovieApiClient.apiClient.getUpcomingMovies(API_KEY, LANGUAGE, 3)
-        getUpcomingMovie.subObserve()
+        binding.progressBar.visibility = View.VISIBLE
+        val sourceUpcomingMovie = getUpcomingMovie.subObserve()
             .subscribe({ it ->
+                binding.progressBar.visibility = View.GONE
                 val movies = it.results
                 val movieList = listOf(MainCardContainer(
                     R.string.upcoming,
@@ -111,8 +113,10 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
                 binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
             }, { error ->
                 // Логируем ошибку
+                binding.progressBar.visibility = View.GONE
                 Timber.tag(TAG).e(error.toString())
             })
+
     }
 
     private fun setMovies(results: List<MovieDto>) {

@@ -8,7 +8,6 @@ import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.ObservableOnSubscribe
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.databinding.SearchToolbarBinding
 
@@ -24,11 +23,11 @@ class SearchBar @JvmOverloads constructor(
     private var isCancelVisible: Boolean = true
 
     val onTextChangedObservable by lazy {
-        Observable.create(ObservableOnSubscribe<String> { subscriber ->
+        Observable.create { subscriber ->
             binding.searchEditText.doAfterTextChanged { text ->
                 subscriber.onNext(text.toString())
             }
-        })
+        }
     }
     init {
         if (attrs != null) {
