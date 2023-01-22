@@ -7,13 +7,17 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.schedulers.Schedulers
+import ru.androidschool.intensiv.BuildConfig
 import ru.androidschool.intensiv.R
-import ru.androidschool.intensiv.data.MockRepository
-import ru.androidschool.intensiv.data.Movie
+import ru.androidschool.intensiv.data.MovieDto
 import ru.androidschool.intensiv.databinding.FeedFragmentBinding
 import ru.androidschool.intensiv.databinding.FeedHeaderBinding
-import ru.androidschool.intensiv.ui.afterTextChanged
+import ru.androidschool.intensiv.network.MovieApiClient
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 class FeedFragment : Fragment(R.layout.feed_fragment) {
 
@@ -51,60 +55,98 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        searchBinding.searchToolbar.binding.searchEditText.afterTextChanged {
-            Timber.d(it.toString())
-            if (it.toString().length > MIN_LENGTH) {
-                openSearch(it.toString())
+        searchBinding.searchToolbar.onTextChangedObservable
+            .map { it.trim() }
+            .debounce(500, TimeUnit.MILLISECONDS)
+            .filter { it.toString().length > MIN_LENGTH }
+            .observeOn(Schedulers.io())
+            .flatMapSingle {
+                MovieApiClient.apiClient.searchByQuery(API_KEY, "ru", it)
             }
-        }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                setMovies(it.results)
+                openSearch(it.results)
+                Timber.tag(TAG).d(it.toString())
+            }, {
+                Timber.tag(TAG).e(it.toString())
+            })
 
-        // Используя Мок-репозиторий получаем фэйковый список фильмов
-        val moviesList = listOf(
+        val getNowPlayingMovie = MovieApiClient.apiClient.getNowPlayingMovie(API_KEY, LANGUAGE)
+
+        getNowPlayingMovie.subObserve()
+            .subscribe(
+                { it ->
+                val movie = it.results
+                val movieList = listOf(
+                    MainCardContainer(
+                        R.string.recommended,
+                        movie.map {
+                            MovieItem(it) { movie ->
+                                openMovieDetails(movie)
+                            }
+                        }.toList()
+                    )
+                )
+                binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
+            }, { error ->
+                    // Логируем ошибку
+                    Timber.tag(TAG).e(error.toString())
+                }
+            )
+
+        val getUpcomingMovie = MovieApiClient.apiClient.getUpcomingMovies(API_KEY, LANGUAGE, 3)
+        getUpcomingMovie.subObserve()
+            .subscribe({ it ->
+                val movies = it.results
+                val movieList = listOf(MainCardContainer(
+                    R.string.upcoming,
+                    movies.map {
+                        MovieItem(it) {
+                                movie ->
+                            openMovieDetails(movie)
+                        }
+                    }.toList()))
+
+                binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
+            }, { error ->
+                // Логируем ошибку
+                Timber.tag(TAG).e(error.toString())
+            })
+    }
+
+    private fun setMovies(results: List<MovieDto>) {
+
+        val movieList = listOf(
             MainCardContainer(
                 R.string.recommended,
-                MockRepository.getMovies().map {
+                results.map {
                     MovieItem(it) { movie ->
-                        openMovieDetails(
-                            movie
-                        )
+                        openMovieDetails(movie)
                     }
                 }.toList()
             )
         )
-
-        binding.moviesRecyclerView.adapter = adapter.apply { addAll(moviesList) }
-
-        // Используя Мок-репозиторий получаем фэйковый список фильмов
-        // Чтобы отобразить второй ряд фильмов
-        val newMoviesList = listOf(
-            MainCardContainer(
-                R.string.upcoming,
-                MockRepository.getMovies().map {
-                    MovieItem(it) { movie ->
-                        openMovieDetails(movie)
-                     }
-                }.toList()
-            )
-        )
-
-        adapter.apply { addAll(newMoviesList) }
+        binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
     }
 
-    private fun openMovieDetails(movie: Movie) {
+    private fun openMovieDetails(movie: MovieDto) {
         val bundle = Bundle()
         bundle.putString(KEY_TITLE, movie.title)
         findNavController().navigate(R.id.movie_details_fragment, bundle, options)
     }
 
-    private fun openSearch(searchText: String) {
+    private fun openSearch(searchText: List<MovieDto>) {
         val bundle = Bundle()
-        bundle.putString(KEY_SEARCH, searchText)
+        bundle.putParcelableArrayList("list", ArrayList(searchText))
+
         findNavController().navigate(R.id.search_dest, bundle, options)
     }
 
     override fun onStop() {
         super.onStop()
         searchBinding.searchToolbar.clear()
+        adapter.clear()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -117,9 +159,17 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         _searchBinding = null
     }
 
+    private fun <T>Single<T>.subObserve():Single<T>{
+      return  this.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+    }
+
     companion object {
         const val MIN_LENGTH = 3
         const val KEY_TITLE = "title"
         const val KEY_SEARCH = "search"
+        private val API_KEY = BuildConfig.THE_MOVIE_DATABASE_API
+        const val TAG = "FeedFragment"
+        const val LANGUAGE = "ru"
     }
 }

@@ -21,8 +21,13 @@ android {
     }
     buildTypes {
         release {
+            buildConfigField "String", "BASE_URL", "https://api.themoviedb.org/3/"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            buildConfigField "String", "BASE_URL", "\"https://api.themoviedb.org/3/\""
+            buildConfigField "String",  "IMG_URL",  "\"https://image.tmdb.org/t/p/w500/\""
         }
     }
 
@@ -74,4 +79,13 @@ dependencies {
     implementation "com.github.lisawray.groupie:groupie-viewbinding:$rootProject.groupieVersion"
 
     implementation "com.jakewharton.timber:timber:$rootProject.timberVersion"
+
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$rootProject.retrofitVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$rootProject.interceptorVersion"
+    implementation 'com.squareup.retrofit2:adapter-rxjava3:2.9.0'
+
+    // RxJava
+    implementation "io.reactivex.rxjava3:rxjava:$rootProject.rxjavaVersion"
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
 }
