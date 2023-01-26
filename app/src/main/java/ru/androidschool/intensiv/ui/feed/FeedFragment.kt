@@ -96,10 +96,10 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
             )
 
         val getUpcomingMovie = MovieApiClient.apiClient.getUpcomingMovies(API_KEY, LANGUAGE, 3)
-        binding.progressBar.visibility = View.VISIBLE
-        val sourceUpcomingMovie = getUpcomingMovie.subObserve()
+         getUpcomingMovie.subObserve()
+            .doOnSubscribe {binding.progressBar.visibility = View.VISIBLE}
+            .doFinally {  binding.progressBar.visibility = View.GONE }
             .subscribe({ it ->
-                binding.progressBar.visibility = View.GONE
                 val movies = it.results
                 val movieList = listOf(MainCardContainer(
                     R.string.upcoming,
@@ -113,14 +113,14 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
                 binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
             }, { error ->
                 // Логируем ошибку
-                binding.progressBar.visibility = View.GONE
                 Timber.tag(TAG).e(error.toString())
             })
-
+//        Observable.zip(
+//            getNowPlayingMovie, MovieApiClient.apiClient.getUpcomingMovies(API_KEY, LANGUAGE, 3),
+//        )
     }
 
     private fun setMovies(results: List<MovieDto>) {
-
         val movieList = listOf(
             MainCardContainer(
                 R.string.recommended,
