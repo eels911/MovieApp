@@ -8,13 +8,11 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.schedulers.Schedulers
 import ru.androidschool.intensiv.BuildConfig
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.TvShow
-import ru.androidschool.intensiv.data.TvShowsResponse
 import ru.androidschool.intensiv.databinding.TvShowsFragmentBinding
 import ru.androidschool.intensiv.network.MovieApiClient
 import ru.androidschool.intensiv.ui.feed.FeedFragment
@@ -41,38 +39,22 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Используя Мок-репозиторий получаем фэйковый список фильмов
-//        val moviesList =
-//            MockRepository.getMovies().map {
-//                SeriesItem(it) { movie ->
-//                    openMovieDetails(movie)
-//                }
-//            }
-//
-//        binding.seriesRecyclerView.adapter = adapter.apply { addAll(moviesList) }
         val getPopularSeries = MovieApiClient.apiClient.getPopularSeries(API_KEY, LANGUAGE, 7)
-        getPopularSeries.enqueue(object : Callback<TvShowsResponse> {
-            override fun onResponse(
-                call: Call<TvShowsResponse>,
-                response: Response<TvShowsResponse>
-            ) {
-                val series = response.body()?.results!!
-
-                val seriesList =
-                    series.map {
-                        SeriesItem(it) {
-                                series ->
-                            openMovieDetails(series)
-                        }
-                    }.toList()
-
-                binding.seriesRecyclerView.adapter = adapter.apply { addAll(seriesList) }
-            }
-
-            override fun onFailure(call: Call<TvShowsResponse>, error: Throwable) {
-                Timber.tag(FeedFragment.TAG).e(error.toString())
-            }
-        })
+        getPopularSeries.observeOn(Schedulers.io())
+           .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ it ->
+               val tvShow = it.results
+               val seriesList =
+                   tvShow.map {
+                       SeriesItem(it) { series ->
+                           openMovieDetails(series)
+                       }
+                   }.toList()
+               binding.seriesRecyclerView.adapter = adapter.apply { addAll(seriesList) }
+           }, { error ->
+               // Логируем ошибку
+               Timber.tag(TAG).e(error.toString())
+           })
     }
 
     override fun onStop() {

@@ -1,7 +1,11 @@
 package ru.androidschool.intensiv.data
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
+import ru.androidschool.intensiv.BuildConfig
 
+@Parcelize
 data class MovieDto(
     @SerializedName("adult")
     val isAdult: Boolean,
@@ -28,8 +32,9 @@ data class MovieDto(
     val video: Boolean?,
     @SerializedName("vote_average")
     val voteAverage: Float
-) {
+) : Parcelable {
     @SerializedName("poster_path")
     var posterPath: String? = null
-        get() = "https://image.tmdb.org/t/p/w500$field"
+        get() = "${BuildConfig.IMG_URL}$field"
+
 }

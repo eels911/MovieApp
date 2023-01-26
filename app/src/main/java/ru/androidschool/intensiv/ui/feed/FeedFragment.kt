@@ -7,18 +7,18 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.subjects.PublishSubject
 import ru.androidschool.intensiv.BuildConfig
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MovieDto
-import ru.androidschool.intensiv.data.MoviesResponse
 import ru.androidschool.intensiv.databinding.FeedFragmentBinding
 import ru.androidschool.intensiv.databinding.FeedHeaderBinding
 import ru.androidschool.intensiv.network.MovieApiClient
-import ru.androidschool.intensiv.ui.afterTextChanged
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 class FeedFragment : Fragment(R.layout.feed_fragment) {
 
@@ -50,70 +50,57 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
     ): View {
         _binding = FeedFragmentBinding.inflate(inflater, container, false)
         _searchBinding = FeedHeaderBinding.bind(binding.root)
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        searchBinding.searchToolbar.binding.searchEditText.afterTextChanged {
-            Timber.d(it.toString())
-            if (it.toString().length > MIN_LENGTH) {
-                openSearch(it.toString())
+   val sourceSearch = PublishSubject.create<String>()
+            .map { it.trim() }
+            .debounce(500, TimeUnit.MILLISECONDS)
+            .filter { it.toString().length > MIN_LENGTH }
+            .observeOn(Schedulers.io())
+            .flatMapSingle {
+                MovieApiClient.apiClient.searchByQuery(API_KEY, "ru", it)
             }
-        }
+            .subscribe({
+                setMovies(it.results)
+                openSearch(it.results)
+                Timber.tag(TAG).d(it.toString())
+            }, {
+                Timber.tag(TAG).e(it.toString())
+            })
+
         val getNowPlayingMovie = MovieApiClient.apiClient.getNowPlayingMovie(API_KEY, LANGUAGE)
 
-        getNowPlayingMovie.enqueue(object : Callback<MoviesResponse> {
-            override fun onResponse(
-                call: Call<MoviesResponse>,
-                response: Response<MoviesResponse>
-            ) {
-                val movies = response.body()?.results!!
-
-                val movieList = listOf(MainCardContainer(
-                    R.string.recommended,
-                    movies.map {
-                        MovieItem(it) {
-                                movie ->
-                            openMovieDetails(movie)
-                        }
-                    }.toList()))
-
+        val sourcePlayingMovie = getNowPlayingMovie.subObserve()
+            .subscribe(
+                { it ->
+                val movie = it.results
+                val movieList = listOf(
+                    MainCardContainer(
+                        R.string.recommended,
+                        movie.map {
+                            MovieItem(it) { movie ->
+                                openMovieDetails(movie)
+                            }
+                        }.toList()
+                    )
+                )
                 binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
-            }
-
-            override fun onFailure(call: Call<MoviesResponse>, error: Throwable) {
-                // Логируем ошибку
-                Timber.tag(TAG).e(error.toString())
-            }
-        }
-
-        )
-
-        // Используя Мок-репозиторий получаем фэйковый список фильмов
-//        val moviesList = listOf(
-//            MainCardContainer(
-//                R.string.recommended,
-//                MockRepository.getMovies().map {
-//                    MovieItem(it) { movie ->
-//                        openMovieDetails(
-//                            movie
-//                        )
-//                    }
-//                }.toList()
-//            )
-//        )
+            }, { error ->
+                    // Логируем ошибку
+                    Timber.tag(TAG).e(error.toString())
+                }
+            )
 
         val getUpcomingMovie = MovieApiClient.apiClient.getUpcomingMovies(API_KEY, LANGUAGE, 3)
-        getUpcomingMovie.enqueue(object : Callback<MoviesResponse> {
-            override fun onResponse(
-                call: Call<MoviesResponse>,
-                response: Response<MoviesResponse>
-            ) {
-                val movies = response.body()?.results!!
-
+         getUpcomingMovie.subObserve()
+            .doOnSubscribe {binding.progressBar.visibility = View.VISIBLE}
+            .doFinally {  binding.progressBar.visibility = View.GONE }
+            .subscribe({ it ->
+                val movies = it.results
                 val movieList = listOf(MainCardContainer(
                     R.string.upcoming,
                     movies.map {
@@ -124,52 +111,27 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
                     }.toList()))
 
                 binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
-            }
-
-            override fun onFailure(call: Call<MoviesResponse>, error: Throwable) {
+            }, { error ->
+                // Логируем ошибку
                 Timber.tag(TAG).e(error.toString())
-            }
-        })
-
-        val getPopularMovie = MovieApiClient.apiClient.getPopularMovies(API_KEY, LANGUAGE, 7)
-        getPopularMovie.enqueue(object : Callback<MoviesResponse> {
-            override fun onResponse(
-                call: Call<MoviesResponse>,
-                response: Response<MoviesResponse>
-            ) {
-                val movies = response.body()?.results!!
-
-                val movieList = listOf(MainCardContainer(
-                    R.string.popular,
-                    movies.map {
-                        MovieItem(it) {
-                                movie ->
-                            openMovieDetails(movie)
-                        }
-                    }.toList()))
-
-                binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
-            }
-
-            override fun onFailure(call: Call<MoviesResponse>, error: Throwable) {
-                Timber.tag(TAG).e(error.toString())
-            }
-        })
-
-        // Используя Мок-репозиторий получаем фэйковый список фильмов
-        // Чтобы отобразить второй ряд фильмов
-//        val newMoviesList = listOf(
-//            MainCardContainer(
-//                R.string.upcoming,
-//                MockRepository.getMovies().map {
-//                    MovieItem(it) { movie ->
-//                        openMovieDetails(movie)
-//                    }
-//                }.toList()
-//            )
+            })
+//        Observable.zip(
+//            getNowPlayingMovie, MovieApiClient.apiClient.getUpcomingMovies(API_KEY, LANGUAGE, 3),
 //        )
-//
-//        adapter.apply { addAll(newMoviesList) }
+    }
+
+    private fun setMovies(results: List<MovieDto>) {
+        val movieList = listOf(
+            MainCardContainer(
+                R.string.recommended,
+                results.map {
+                    MovieItem(it) { movie ->
+                        openMovieDetails(movie)
+                    }
+                }.toList()
+            )
+        )
+        binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
     }
 
     private fun openMovieDetails(movie: MovieDto) {
@@ -178,9 +140,10 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         findNavController().navigate(R.id.movie_details_fragment, bundle, options)
     }
 
-    private fun openSearch(searchText: String) {
+    private fun openSearch(searchText: List<MovieDto>) {
         val bundle = Bundle()
-        bundle.putString(KEY_SEARCH, searchText)
+        bundle.putParcelableArrayList("list", ArrayList(searchText))
+
         findNavController().navigate(R.id.search_dest, bundle, options)
     }
 
@@ -200,13 +163,17 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         _searchBinding = null
     }
 
+    private fun <T>Single<T>.subObserve():Single<T>{
+      return  this.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+    }
+
     companion object {
         const val MIN_LENGTH = 3
         const val KEY_TITLE = "title"
         const val KEY_SEARCH = "search"
         private val API_KEY = BuildConfig.THE_MOVIE_DATABASE_API
         const val TAG = "FeedFragment"
-        const val MOVIE_ID = "movie_id"
         const val LANGUAGE = "ru"
     }
 }

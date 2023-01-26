@@ -3,6 +3,9 @@ apply plugin: 'kotlin-android'
 
 apply from: "../ktlint.gradle"
 
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-parcelize'
+
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
@@ -22,10 +25,12 @@ android {
     buildTypes {
         release {
             buildConfigField "String", "BASE_URL", "https://api.themoviedb.org/3/"
+            buildConfigField "String",  "IMG_URL",  "\"https://image.tmdb.org/t/p/w500/\""
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
+            buildConfigField "String",  "IMG_URL",  "\"https://image.tmdb.org/t/p/w500/\""
             buildConfigField "String", "BASE_URL", "\"https://api.themoviedb.org/3/\""
         }
     }
@@ -82,4 +87,9 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$rootProject.retrofitVersion"
     implementation "com.squareup.okhttp3:logging-interceptor:$rootProject.interceptorVersion"
+    implementation "com.squareup.retrofit2:adapter-rxjava3:$rootProject.rxjavaAdapter"
+
+    // RxJava
+    implementation "io.reactivex.rxjava3:rxjava:$rootProject.rxjavaVersion"
+    implementation "io.reactivex.rxjava3:rxandroid:$rootProject.rxjavaVersion"
 }
