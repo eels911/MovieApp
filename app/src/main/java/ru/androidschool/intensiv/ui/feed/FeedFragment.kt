@@ -13,7 +13,9 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.PublishSubject
 import ru.androidschool.intensiv.BuildConfig
 import ru.androidschool.intensiv.R
+import ru.androidschool.intensiv.data.Movie
 import ru.androidschool.intensiv.data.MovieDto
+import ru.androidschool.intensiv.data.database.MovieDatabase
 import ru.androidschool.intensiv.databinding.FeedFragmentBinding
 import ru.androidschool.intensiv.databinding.FeedHeaderBinding
 import ru.androidschool.intensiv.network.MovieApiClient
@@ -25,11 +27,13 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
     private var _binding: FeedFragmentBinding? = null
     private var _searchBinding: FeedHeaderBinding? = null
 
+
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
     private val searchBinding get() = _searchBinding!!
-
+    private var db : MovieDatabase? = null
+    private  var savedb: List<Movie>? = null
     private val adapter by lazy {
         GroupAdapter<GroupieViewHolder>()
     }
@@ -88,6 +92,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
                         }.toList()
                     )
                 )
+
                 binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
             }, { error ->
                     // Логируем ошибку
@@ -97,10 +102,15 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
 
         val getUpcomingMovie = MovieApiClient.apiClient.getUpcomingMovies(API_KEY, LANGUAGE, 3)
          getUpcomingMovie.subObserve()
-            .doOnSubscribe {binding.progressBar.visibility = View.VISIBLE}
-            .doFinally {  binding.progressBar.visibility = View.GONE }
+            .doOnSubscribe {
+                binding.progressBar.visibility = View.VISIBLE}
+
+            .doFinally {
+                binding.progressBar.visibility = View.GONE }
+
             .subscribe({ it ->
                 val movies = it.results
+               savedb = it.results.map { movie -> movieResponseToMovie(movie)  }
                 val movieList = listOf(MainCardContainer(
                     R.string.upcoming,
                     movies.map {
@@ -115,10 +125,18 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
                 // Логируем ошибку
                 Timber.tag(TAG).e(error.toString())
             })
+
+
 //        Observable.zip(
 //            getNowPlayingMovie, MovieApiClient.apiClient.getUpcomingMovies(API_KEY, LANGUAGE, 3),
 //        )
     }
+
+
+    private fun movieResponseToMovie(moviesResponse: MovieDto) = Movie(
+        id = moviesResponse.id,
+        title = moviesResponse.title,
+    )
 
     private fun setMovies(results: List<MovieDto>) {
         val movieList = listOf(
@@ -167,6 +185,10 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
       return  this.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
     }
+
+
+
+
 
     companion object {
         const val MIN_LENGTH = 3

@@ -9,4 +9,6 @@ data class MoviesResponse(
     var totalResults: Int,
     @SerializedName("total_pages")
     var totalPages: Int
-)
+){
+
+}

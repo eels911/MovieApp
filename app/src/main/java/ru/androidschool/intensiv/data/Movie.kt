@@ -1,9 +1,12 @@
 package ru.androidschool.intensiv.data
 
+import ru.androidschool.intensiv.data.database.MovieEntity
+
 class Movie(
-    var title: String? = "",
-    var voteAverage: Double = 0.0
+
+    val id: Int?,
+    var title: String?,
+
 ) {
-    val rating: Float
-        get() = voteAverage.div(2).toFloat()
+    fun convertMovie() = MovieEntity(id, title)
 }

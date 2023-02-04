@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
-import ru.androidschool.intensiv.data.MockRepository
 import ru.androidschool.intensiv.databinding.FragmentWatchlistBinding
 
 class WatchlistFragment : Fragment() {
@@ -38,14 +37,14 @@ class WatchlistFragment : Fragment() {
         binding.moviesRecyclerView.layoutManager = GridLayoutManager(context, 4)
         binding.moviesRecyclerView.adapter = adapter.apply { addAll(listOf()) }
 
-        val moviesList =
-            MockRepository.getMovies().map {
-                MoviePreviewItem(
-                    it
-                ) { movie -> }
-            }.toList()
-
-        binding.moviesRecyclerView.adapter = adapter.apply { addAll(moviesList) }
+//        val moviesList =
+//            MockRepository.getMovies().map {
+//                MoviePreviewItem(
+//                    it
+//                ) { movie -> }
+//            }.toList()
+//
+//        binding.moviesRecyclerView.adapter = adapter.apply { addAll(moviesList) }
     }
 
     override fun onDestroyView() {
