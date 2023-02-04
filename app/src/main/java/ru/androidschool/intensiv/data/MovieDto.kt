@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 import ru.androidschool.intensiv.BuildConfig
+import ru.androidschool.intensiv.data.database.MovieEntity
 
 @Parcelize
 data class MovieDto(
@@ -36,5 +37,10 @@ data class MovieDto(
     @SerializedName("poster_path")
     var posterPath: String? = null
         get() = "${BuildConfig.IMG_URL}$field"
+
+    fun convertMovie(): MovieEntity {
+        return MovieEntity(id = id ,
+        title = title)
+    }
 
 }

@@ -10,6 +10,8 @@ import com.xwray.groupie.GroupieViewHolder
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MockRepository
 import ru.androidschool.intensiv.data.MovieDetailsResponse
+import ru.androidschool.intensiv.data.MovieDto
+import ru.androidschool.intensiv.data.database.MovieEntity
 import ru.androidschool.intensiv.databinding.MovieDetailsFragmentBinding
 import ru.androidschool.intensiv.network.MovieApiClient
 
@@ -23,6 +25,7 @@ private var _binding: MovieDetailsFragmentBinding? = null
         GroupAdapter<GroupieViewHolder>()
     }
 
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -32,14 +35,22 @@ private var _binding: MovieDetailsFragmentBinding? = null
         return binding.root
     }
 
+
+
+
+
+    fun convertMovie(dto: MovieDto): MovieEntity { return MovieEntity(dto.id ,dto.title) }
 override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
+
 
     // Используя Мок-репозиторий получаем фэйковый список фильмов
     val actorList =
         MockRepository.getActors().map {
             ActorItem(it)
         }
+
+
 
     val getMovieDetails = MovieApiClient.apiClient.getMovieDetails(id)
 
