@@ -21,7 +21,7 @@ data class MovieDto(
     @SerializedName("original_language")
     val originalLanguage: String,
     @SerializedName("title")
-    var title: String,
+    val title: String,
     @SerializedName("backdrop_path")
     val backdropPath: String,
     @SerializedName("popularity")
@@ -31,10 +31,11 @@ data class MovieDto(
     @SerializedName("video")
     val video: Boolean,
     @SerializedName("vote_average")
-    val voteAverage: Double
-) : Parcelable {
+    val voteAverage: Double,
     @SerializedName("poster_path")
-    var posterPath: String? = null
-        get() = "${BuildConfig.IMG_URL}$field"
+    val posterPath: String,
+    var fulposterPath: String = "${BuildConfig.IMG_URL}$posterPath"
+) : Parcelable {
+
 
 }

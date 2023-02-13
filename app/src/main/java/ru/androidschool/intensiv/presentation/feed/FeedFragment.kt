@@ -9,12 +9,15 @@ import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.functions.Function3
 import io.reactivex.rxjava3.schedulers.Schedulers
-import io.reactivex.rxjava3.subjects.PublishSubject
 import ru.androidschool.intensiv.BuildConfig
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.database.MovieDatabase
+import ru.androidschool.intensiv.data.database.MovieEntity
 import ru.androidschool.intensiv.data.dto.MovieDto
+import ru.androidschool.intensiv.data.dto.MoviesResponseDto
 import ru.androidschool.intensiv.data.network.MovieApiClient
 import ru.androidschool.intensiv.data.vo.Movie
 import ru.androidschool.intensiv.databinding.FeedFragmentBinding
@@ -32,11 +35,12 @@ class FeedFragment : Fragment(R.layout.feed_fragment){
     // onDestroyView.
     private val binding get() = _binding!!
     private val searchBinding get() = _searchBinding!!
-    private var db : MovieDatabase? = null
+    private lateinit var db : MovieDatabase
     private  var savedb: List<Movie>? = null
     private val adapter by lazy {
         GroupAdapter<GroupieViewHolder>()
     }
+    val compositeDisposable = CompositeDisposable()
 
 //    private val presenter: MoviesPresenter by lazy {
 //        MoviesPresenter(PopularMovieUseCase(PopularMoviesRemoteRepository))
@@ -65,11 +69,13 @@ class FeedFragment : Fragment(R.layout.feed_fragment){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        db = MovieDatabase.instance!!
+
 //        presenter.attachView(this)
 //
 //        presenter.getPopularMovies()
 
-   val sourceSearch = PublishSubject.create<String>()
+        searchBinding.searchToolbar.onTextChangedObservable
             .map { it.trim() }
             .debounce(500, TimeUnit.MILLISECONDS)
             .filter { it.toString().length > MIN_LENGTH }
@@ -78,95 +84,76 @@ class FeedFragment : Fragment(R.layout.feed_fragment){
                 MovieApiClient.apiClient.searchByQuery(API_KEY, "ru", it)
             }
             .subscribe({
-                setMovies(it.results)
                 openSearch(it.results)
                 Timber.tag(TAG).d(it.toString())
             }, {
                 Timber.tag(TAG).e(it.toString())
             })
 
-        val getNowPlayingMovie = MovieApiClient.apiClient.getNowPlayingMovie(API_KEY, LANGUAGE)
+        val getNowPlayingMovie = MovieApiClient.apiClient.getNowPlayingMovie()
 
-        val sourcePlayingMovie = getNowPlayingMovie.subObserve()
-            .subscribe(
-                { it ->
-                val movie = it.results
-                val movieList = listOf(
-                    MainCardContainer(
-                        R.string.recommended,
-                        movie.map {
-                            MovieItem(it) { movie ->
-                                openMovieDetails(movie)
-                            }
-                        }.toList()
-                    )
-                )
+        val getUpcomingMovie = MovieApiClient.apiClient.getUpcomingMovies()
 
-                binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
-            }, { error ->
-                    // Логируем ошибку
-                    Timber.tag(TAG).e(error.toString())
-                }
-            )
+        val getMoviePopulars = MovieApiClient.apiClient.getPopularMovies()
 
-        val getUpcomingMovie = MovieApiClient.apiClient.getUpcomingMovies(API_KEY, LANGUAGE, 3)
-         getUpcomingMovie.subObserve()
-            .doOnSubscribe {
-                binding.progressBar.visibility = View.VISIBLE}
+        val hashMapMovie = Single.zip(getNowPlayingMovie, getUpcomingMovie, getMoviePopulars, Function3<
+                MoviesResponseDto,
+                MoviesResponseDto,
+                MoviesResponseDto,
+                HashMap<String, List<MovieDto>>> {
+                t1: MoviesResponseDto, t2: MoviesResponseDto, t3: MoviesResponseDto ->
+            hashMapOf(MovieEnumClass.NOWPLAYING.toString() to t1.results,
+                MovieEnumClass.UPCOMING.toString() to t2.results,
+                MovieEnumClass.POPULAR.toString() to t3.results)
+        })
 
-            .doFinally {
-                binding.progressBar.visibility = View.GONE }
+        compositeDisposable.add(hashMapMovie
+            .subObserve()
+            .subscribe({ movies ->
 
-            .subscribe({ it ->
-                val movies = it.results
-                val movieList = listOf(
-                    MainCardContainer(
-                    R.string.upcoming,
-                    movies.map {
-                        MovieItem(it) {
-                                movie ->
-                            openMovieDetails(movie)
-                        }
-                    }.toList())
-                )
+                val moviePopular = createMainCardContainer(movies.getValue(MovieEnumClass.POPULAR.toString()), R.string.popular)
+                val movieUpcoming = createMainCardContainer(movies.getValue(MovieEnumClass.UPCOMING.toString()), R.string.upcoming)
+                val movieNowPlaying = createMainCardContainer(movies.getValue(MovieEnumClass.NOWPLAYING.toString()), R.string.recommended)
 
-                binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
+                binding.moviesRecyclerView.adapter = adapter.apply { addAll(moviePopular) }
+                binding.progressBar.visibility = View.INVISIBLE
+
+                binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieUpcoming) }
+
+                binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieNowPlaying)}
+
             }, { error ->
                 // Логируем ошибку
                 Timber.tag(TAG).e(error.toString())
             })
-
-
-//        Observable.zip(
-//            getNowPlayingMovie, MovieApiClient.apiClient.getUpcomingMovies(API_KEY, LANGUAGE, 3),
-//        )
+        )
     }
 
-
-    private fun setMovies(results: List<MovieDto>) {
-        val movieList = listOf(
-            MainCardContainer(
-                R.string.recommended,
-                results.map {
-                    MovieItem(it) { movie ->
-                        openMovieDetails(movie)
-                    }
-                }.toList()
-            )
-        )
-        binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
+    fun createMainCardContainer(listMovie: List<MovieDto>, typeMovie: Int): List<MainCardContainer> {
+        val list = listOf(listMovie.map {
+            MovieItem(it) { movie ->
+                openMovieDetails(movie)
+            }
+        }.let {
+            MainCardContainer(typeMovie, it.toList())
+        })
+        return list
     }
 
     private fun openMovieDetails(movie: MovieDto) {
         val bundle = Bundle()
+        //добавить всю инфу через "bundle" для уаждого поля свой ключ(или чере зайти)
+        db.movieDao().save(listOf(MovieEntity(movie.id,movie.title)))
+            .subscribeOn(Schedulers.io())
+            .subscribe { }
         bundle.putString(KEY_TITLE, movie.title)
+      //  bundle.putString(KEY_TITLE, movie.id)
         findNavController().navigate(R.id.movie_details_fragment, bundle, options)
     }
 
     private fun openSearch(searchText: List<MovieDto>) {
         val bundle = Bundle()
         bundle.putParcelableArrayList("list", ArrayList(searchText))
-
         findNavController().navigate(R.id.search_dest, bundle, options)
     }
 
@@ -201,17 +188,4 @@ class FeedFragment : Fragment(R.layout.feed_fragment){
         const val LANGUAGE = "ru"
     }
 
-//    override fun showPopularMovies(movies: List<Movie>) {
-//        val movieList = listOf(
-//            MainCardContainer(
-//                R.string.recommended,
-//                movies.map {
-//                    MovieItem(it) { movie ->
-//                        openMovieDetails(movie)
-//                    }
-//                }.toList()
-//            )
-//        )
-//        binding.moviesRecyclerView.adapter = adapter.apply { addAll(movieList) }
-//    }
 }

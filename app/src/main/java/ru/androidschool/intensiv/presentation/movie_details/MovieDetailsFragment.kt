@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
 import ru.androidschool.intensiv.R
+import ru.androidschool.intensiv.data.database.MovieDatabase
 import ru.androidschool.intensiv.data.database.MovieEntity
 import ru.androidschool.intensiv.data.dto.MovieDto
 import ru.androidschool.intensiv.data.network.MovieApiClient
@@ -19,7 +20,7 @@ class MovieDetailsFragment : Fragment(R.layout.movie_details_fragment) {
 private var _binding: MovieDetailsFragmentBinding? = null
 
     private val binding get() = _binding!!
-
+    private var db : MovieDatabase? = null
     private val adapter by lazy {
         GroupAdapter<GroupieViewHolder>()
     }

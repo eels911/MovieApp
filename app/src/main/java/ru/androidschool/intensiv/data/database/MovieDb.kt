@@ -10,7 +10,7 @@ abstract class MovieDatabase : RoomDatabase() {
     abstract fun movieDao(): MovieDao
 
     companion object {
-        private var instance: MovieDatabase? = null
+        var instance: MovieDatabase? = null
         @Synchronized
         fun get(context: Context): MovieDatabase {
             if (instance == null) {

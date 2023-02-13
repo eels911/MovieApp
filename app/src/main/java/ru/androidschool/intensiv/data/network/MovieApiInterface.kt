@@ -22,7 +22,7 @@ interface MovieApiInterface {
     fun getUpcomingMovies(
         @Query("api_key") apiKey: String = API_KEY,
         @Query("language") language: String = LANGUAGE,
-        @Query(PAGE) page: Int
+        @Query("page") page: Int = PAGE
     ): Single<MoviesResponseDto>
 
     @GET("movie/popular")
@@ -53,6 +53,6 @@ interface MovieApiInterface {
     companion object {
         private const val API_KEY = BuildConfig.THE_MOVIE_DATABASE_API
         private const val LANGUAGE = "ru"
-        private const val PAGE = "3"
+        private const val PAGE = 3
     }
 }
