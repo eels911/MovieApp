@@ -63,6 +63,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
     implementation 'androidx.room:room-common:2.5.0'
+    implementation "androidx.room:room-rxjava3:$roomVersion"
 
     // Testing
     testImplementation "junit:junit:$junitVersion"
