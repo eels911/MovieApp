@@ -16,7 +16,7 @@ object MovieMapper {
             originalTitle = dto.originalTitle,
             overview = dto.overview,
             popularity = dto.popularity,
-            posterPath = dto.posterPath!!,
+            posterPath = dto.posterPath,
             releaseDate = dto.releaseDate,
             title = dto.title,
             voteAverage = dto.voteAverage

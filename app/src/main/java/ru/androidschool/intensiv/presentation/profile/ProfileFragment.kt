@@ -1,15 +1,12 @@
 package ru.androidschool.intensiv.presentation.profile
 
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.style.RelativeSizeSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
-import com.google.android.material.tabs.TabLayoutMediator
 import com.squareup.picasso.Picasso
 import jp.wasabeef.picasso.transformations.CropCircleTransformation
 import ru.androidschool.intensiv.R
@@ -65,19 +62,19 @@ class ProfileFragment : Fragment() {
             profilePageChangeCallback
         )
 
-        TabLayoutMediator(binding.tabLayout, binding.profileViewPager) { tab, position ->
-
-            // Выделение первой части заголовка таба
-            // Название таба
-            val title = profileTabLayoutTitles[position]
-            // Раздеряем название на части. Первый элемент будет кол-во
-            val parts = profileTabLayoutTitles[position].split(" ")
-            val number = parts[0]
-            val spannableStringTitle = SpannableString(title)
-            spannableStringTitle.setSpan(RelativeSizeSpan(2f), 0, number.count(), 0)
-
-            tab.text = spannableStringTitle
-        }.attach()
+//        TabLayoutMediator(binding.tabLayout, binding.profileViewPager) { tab, position ->
+//
+//            // Выделение первой части заголовка таба
+//            // Название таба
+//            val title = profileTabLayoutTitles[position]
+//            // Раздеряем название на части. Первый элемент будет кол-во
+//            val parts = profileTabLayoutTitles[position].split(" ")
+//            val number = parts[0]
+//            val spannableStringTitle = SpannableString(title)
+//            spannableStringTitle.setSpan(RelativeSizeSpan(2f), 0, number.count(), 0)
+//
+//            tab.text = spannableStringTitle
+//        }.attach()
     }
 
     override fun onDestroyView() {

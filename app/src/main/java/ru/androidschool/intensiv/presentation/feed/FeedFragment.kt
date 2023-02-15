@@ -7,7 +7,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.functions.Function3
@@ -15,13 +14,12 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import ru.androidschool.intensiv.BuildConfig
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.database.MovieDatabase
-import ru.androidschool.intensiv.data.database.MovieEntity
 import ru.androidschool.intensiv.data.dto.MovieDto
 import ru.androidschool.intensiv.data.dto.MoviesResponseDto
 import ru.androidschool.intensiv.data.network.MovieApiClient
-import ru.androidschool.intensiv.data.vo.Movie
 import ru.androidschool.intensiv.databinding.FeedFragmentBinding
 import ru.androidschool.intensiv.databinding.FeedHeaderBinding
+import ru.androidschool.intensiv.domain.subObserve
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -36,7 +34,6 @@ class FeedFragment : Fragment(R.layout.feed_fragment){
     private val binding get() = _binding!!
     private val searchBinding get() = _searchBinding!!
     private lateinit var db : MovieDatabase
-    private  var savedb: List<Movie>? = null
     private val adapter by lazy {
         GroupAdapter<GroupieViewHolder>()
     }
@@ -69,7 +66,6 @@ class FeedFragment : Fragment(R.layout.feed_fragment){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        db = MovieDatabase.instance!!
 
 //        presenter.attachView(this)
 //
@@ -143,11 +139,15 @@ class FeedFragment : Fragment(R.layout.feed_fragment){
     private fun openMovieDetails(movie: MovieDto) {
         val bundle = Bundle()
         //добавить всю инфу через "bundle" для уаждого поля свой ключ(или чере зайти)
-        db.movieDao().save(listOf(MovieEntity(movie.id,movie.title)))
-            .subscribeOn(Schedulers.io())
-            .subscribe { }
-        bundle.putString(KEY_TITLE, movie.title)
+//        db.movieDao().save(listOf(MovieEntity(movie.id,movie.title)))
+//            .subscribeOn(Schedulers.io())
+//            .subscribe { }
       //  bundle.putString(KEY_TITLE, movie.id)
+        bundle.putString(KEY_TITLE, movie.title)
+        bundle.putDouble(RATING, movie.voteAverage)
+        bundle.putString(OVERVIEW, movie.overview)
+        bundle.putInt(ID, movie.id)
+        bundle.putString(POSTERPATH, movie.posterPath)
         findNavController().navigate(R.id.movie_details_fragment, bundle, options)
     }
 
@@ -173,10 +173,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment){
         _searchBinding = null
     }
 
-    private fun <T>Single<T>.subObserve():Single<T>{
-      return  this.subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-    }
+
 
 
     companion object {
@@ -186,6 +183,10 @@ class FeedFragment : Fragment(R.layout.feed_fragment){
         private val API_KEY = BuildConfig.THE_MOVIE_DATABASE_API
         const val TAG = "FeedFragment"
         const val LANGUAGE = "ru"
+        const val RATING = "rating"
+        const val OVERVIEW = "overview"
+        const val POSTERPATH = "posterPath"
+        const val ID = "id"
     }
 
 }

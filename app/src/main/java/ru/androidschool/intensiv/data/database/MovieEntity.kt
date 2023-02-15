@@ -8,9 +8,18 @@ import androidx.room.PrimaryKey
 data class MovieEntity(
     @PrimaryKey
     @ColumnInfo(name = "movieId")
-    val id: Int?,
+    val id: Int,
     @ColumnInfo(name = "title")
-    val title: String?
+    val title: String?,
+
+    @ColumnInfo(name = "posterPath")
+    val posterPath: String?,
+
+    @ColumnInfo(name = "overview")
+    val overview: String?,
+
+    @ColumnInfo(name = "rating")
+    val rating: Float?
 ){
 
 }
